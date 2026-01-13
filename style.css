@@ -1,0 +1,503 @@
+/* =========================================
+   1. 全局主题与配色 (Theme Configuration)
+   方便后续进行暗黑/亮色模式切换或品牌色定制
+   ========================================= */
+:root {
+    --primary: #3b82f6;          /* 核心主色 - 科技蓝 */
+    --primary-dark: #1d4ed8;     /* 交互反馈色 - 鼠标悬停 */
+    --bg-body: #0f172a;          /* 页面底层深色背景 */
+    --bg-card: #1e293b;          /* 模块卡片背景 */
+    --bg-input: #334155;         /* 输入区域背景 - 稍微亮一点 */
+    --text-main: #f1f5f9;        /* 主要阅读文字 */
+    --text-muted: #94a3b8;       /* 次要信息/提示文字 */
+    --border: #475569;           /* 边框分割线 */
+    --success: #10b981;          /* 状态色 - 成功 */
+    --danger: #ef4444;           /* 状态色 - 危险/错误 */
+    --warning: #f59e0b;          /* 状态色 - 警告 */
+    --purple: #8b5cf6;           /* 特殊功能色 (如 AI/Warp) */
+    --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* =========================================
+   2. 基础重置 (Reset & Layout)
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden; /* 杜绝横向滚动条，防止手机端左右晃动 */
+}
+
+/* RTL (Right-to-Left) 支持 - 针对波斯语用户，界面完全镜像翻转 */
+body.rtl {
+    direction: rtl;
+    font-family: 'Vazirmatn', var(--font-main);
+}
+
+/* 自定义滚动条 - 让 Windows 看起来像 Mac 一样优雅 */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-body); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* =========================================
+   3. 语言切换过渡特效 (Language Switch FX)
+   让文字变化不那么生硬，增加一种“数据重载”的科技感
+   ========================================= */
+
+/* 监听所有带有 data-i18n 的元素 */
+[data-i18n] {
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                filter 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: opacity, filter, transform;
+}
+
+/* 切换语言瞬间触发：文字模糊 + 下沉 + 消失 */
+body.lang-switching [data-i18n] {
+    opacity: 0;                 
+    filter: blur(4px);          
+    transform: translateY(3px); 
+}
+
+/* =========================================
+   4. Toast 通知系统 (Notification System)
+   无需引入第三方库，原生手写，轻量且高性能
+   ========================================= */
+#toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 20000; /* 必须最高层级，盖过遮罩 */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none; /* 让鼠标点击穿透空白区域 */
+}
+
+/* RTL 模式下 Toast 移到左侧 */
+body.rtl #toast-container {
+    right: auto;
+    left: 20px;
+}
+
+.toast {
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border);
+    color: var(--text-main);
+    padding: 16px 20px;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 300px;
+    max-width: 400px;
+    pointer-events: auto; /* 只有提示框本身可点击 */
+    transform: translateX(120%); /* 初始状态：藏在屏幕右侧外 */
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.3s;
+    opacity: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+body.rtl .toast { transform: translateX(-120%); } /* RTL 初始藏在左侧外 */
+
+.toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+/* Toast 左侧彩色指示条 */
+.toast-success { border-left: 4px solid var(--success); }
+.toast-error { border-left: 4px solid var(--danger); }
+.toast-warning { border-left: 4px solid var(--warning); }
+.toast-info { border-left: 4px solid var(--primary); }
+
+/* RTL 模式下边框条要在右边 */
+body.rtl .toast { border-left: 1px solid var(--border); border-right-width: 4px; border-right-style: solid; }
+body.rtl .toast-success { border-right-color: var(--success); }
+body.rtl .toast-error { border-right-color: var(--danger); }
+body.rtl .toast-warning { border-right-color: var(--warning); }
+body.rtl .toast-info { border-right-color: var(--primary); }
+
+.toast i { font-size: 1.2rem; }
+.toast-success i { color: var(--success); }
+.toast-error i { color: var(--danger); }
+.toast-warning i { color: var(--warning); }
+.toast-info i { color: var(--primary); }
+
+/* 移动端 Toast 从顶部滑下，不占满屏幕宽度太丑 */
+@media (max-width: 768px) {
+    #toast-container { top: 10px; right: 10px; left: 10px; width: auto; }
+    .toast { min-width: auto; width: 100%; transform: translateY(-150%); } 
+    body.rtl .toast { transform: translateY(-150%); }
+    .toast.show { transform: translateY(0); }
+}
+
+/* =========================================
+   5. 交互遮罩层 (Overlays)
+   登录和混淆时的全屏特效
+   ========================================= */
+
+/* 登录页全屏背景 */
+#login-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at top right, #1e293b, #0f172a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease;
+}
+
+.login-box {
+    background: rgba(30, 41, 59, 0.8);
+    backdrop-filter: blur(12px); /* 磨砂玻璃质感 */
+    border: 1px solid var(--border);
+    padding: 40px;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* AI 混淆时的全屏黑色遮罩 (黑客帝国风格) */
+#obfuscation-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 10000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.matrix-text {
+    color: var(--success);
+    font-family: 'Courier New', monospace;
+    margin-top: 20px;
+    font-size: 1.2rem;
+    text-shadow: 0 0 5px var(--success); /* 绿色荧光效果 */
+}
+
+/* =========================================
+   6. 核心布局 (Main Layout)
+   Sidebar + Content 的经典后台布局
+   ========================================= */
+#app-container {
+    display: none; /* 必须先隐藏，等登录成功后再显现 */
+    opacity: 0;
+    width: 100%;
+    display: flex;
+    transition: opacity 0.5s ease;
+}
+
+/* 侧边栏 */
+.sidebar {
+    width: 260px;
+    background-color: var(--bg-card);
+    border-right: 1px solid var(--border);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    transition: transform 0.3s ease;
+}
+
+/* RTL: 侧边栏在右边 */
+body.rtl .sidebar {
+    border-right: none;
+    border-left: 1px solid var(--border);
+    left: auto;
+    right: 0;
+}
+
+.brand {
+    padding: 24px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.brand span {
+    font-size: 0.8rem;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--text-main);
+}
+
+.nav-menu {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    color: var(--text-muted);
+    border-radius: 8px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.nav-item i {
+    width: 24px;
+    text-align: center;
+    margin-right: 12px;
+}
+
+body.rtl .nav-item i {
+    margin-right: 0;
+    margin-left: 12px;
+}
+
+.nav-item:hover, .nav-item.active {
+    background-color: var(--primary);
+    color: white;
+}
+
+.user-panel {
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.user-info-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+/* 主内容区域，留出 Sidebar 的宽度 */
+.main-content {
+    margin-left: 260px;
+    padding: 30px;
+    width: calc(100% - 260px);
+    min-height: 100vh;
+    transition: margin 0.3s ease;
+}
+
+body.rtl .main-content {
+    margin-left: 0;
+    margin-right: 260px;
+}
+
+.header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+/* =========================================
+   7. 通用 UI 组件 (Components)
+   ========================================= */
+
+/* Tab 切换动画 */
+.section {
+    display: none;
+    animation: slideUp 0.3s ease-out;
+}
+.section.active { display: block; }
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* 卡片容器 */
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-main);
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* 响应式网格 */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.grid-ports { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
+
+/* 表单元素 */
+.form-group { margin-bottom: 15px; }
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.form-control:focus { border-color: var(--primary); }
+textarea.form-control { font-family: monospace; line-height: 1.5; }
+
+/* 语言选择下拉 */
+.lang-select {
+    width: 100%;
+    padding: 8px;
+    background: var(--bg-input);
+    color: var(--text-main);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* 按钮组 */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: filter 0.2s;
+    color: white;
+}
+.btn:hover { filter: brightness(110%); }
+.btn-primary { background-color: var(--primary); }
+.btn-success { background-color: var(--success); }
+.btn-danger { background-color: var(--danger); }
+.btn-purple { background-color: var(--purple); }
+.btn-secondary { background-color: var(--border); }
+.btn-full { width: 100%; justify-content: center; }
+
+/* 切换行 (Toggle Row) */
+.toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid transparent;
+}
+.toggle-row:hover { border-color: var(--border); }
+
+/* iOS 风格的开关 (Switch) */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #475569; transition: .4s; border-radius: 24px;
+}
+.slider:before {
+    position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+    background-color: white; transition: .4s; border-radius: 50%;
+}
+input:checked + .slider { background-color: var(--primary); }
+input:checked + .slider:before { transform: translateX(20px); }
+
+/* RTL 模式下开关方向修正 */
+body.rtl .slider:before { left: auto; right: 3px; }
+body.rtl input:checked + .slider:before { transform: translateX(-20px); }
+
+/* 端口号方块 */
+.port-item {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+.port-item:hover { border-color: var(--text-muted); }
+.port-item.active { background: var(--primary); border-color: var(--primary); color: white; }
+
+/* 终端模拟器风格日志窗口 */
+.terminal-window {
+    background: #000;
+    border-radius: 8px;
+    padding: 15px;
+    height: 300px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #0f0;
+    border: 1px solid #333;
+    direction: ltr !important; /* 日志必须强制从左到右，否则波斯语下会乱掉 */
+    text-align: left;
+}
+
+/* 移动端适配 */
+.mobile-menu-btn { display: none; }
+@media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    body.rtl .sidebar { transform: translateX(100%); } /* RTL 隐藏方向相反 */
+    
+    .sidebar.show { transform: translateX(0); }
+    
+    .main-content { margin-left: 0; margin-right: 0; width: 100%; padding: 15px; }
+    .mobile-menu-btn {
+        display: block; position: fixed; top: 15px; left: 15px; z-index: 200;
+        background: var(--bg-card); border: 1px solid var(--border); color: white; 
+        padding: 8px 12px; border-radius: 6px;
+    }
+    body.rtl .mobile-menu-btn { left: auto; right: 15px; }
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
