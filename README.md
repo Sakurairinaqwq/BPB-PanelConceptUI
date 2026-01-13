@@ -78,5 +78,5 @@
 
 ## 许可证
 
-MIT License (或更宽松的 Public Domain)。
+MIT License
 简而言之：代码给你了，怎么用随你。
