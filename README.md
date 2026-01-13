@@ -1,9 +1,3 @@
-这是一个更新后的 `README.md`。
-
-我保留了之前的“开发者口语化”风格（没有任何 Emoji），并专门添加了一个醒目的章节来阐述与 `BPBPanel-ThreeBodyConceptVersion` 的区别，重点强调了“自由修改”和“二次创作”的权限。
-
----
-
 # BPB Panel v4.6 (UI Concept / Refactored)
 
 这是一个用于 Cloudflare Worker 节点管理的后台管理面板**概念设计**。
